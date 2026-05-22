@@ -260,6 +260,10 @@ namespace TestAIStrategyCSV
         protected decimal RiskMultiplier = 1.0m;
         private decimal _baseLeverage = 1.0m;
 
+        // НОВЫЕ ФЛАГИ УПРАВЛЕНИЯ НАПРАВЛЕНИЕМ СДЕЛОК
+        public bool AllowLong { get; set; } = true;
+        public bool AllowShort { get; set; } = true;
+
         public decimal Balance { get; protected set; }
         public int TotalTrades { get; protected set; }
         public decimal MaxDrawdown { get; protected set; }
@@ -276,6 +280,8 @@ namespace TestAIStrategyCSV
             MaxDrawdown = 0m;
             CommissionRate = commission;
         }
+        // ... метод SetLeverage остается прежним ...
+
 
         public void SetLeverage(decimal leverage)
         {
@@ -285,6 +291,10 @@ namespace TestAIStrategyCSV
 
         protected void Trade(int targetPosition, decimal currentPrice, DateTime date)
         {
+            // ИСПРАВЛЕНО: Блокируем вход, если направление запрещено флагами
+            if (targetPosition == 1 && !AllowLong) targetPosition = 0;
+            if (targetPosition == -1 && !AllowShort) targetPosition = 0;
+
             if (targetPosition == CurrentPosition) return;
 
             if (CurrentPosition != 0)
@@ -295,7 +305,6 @@ namespace TestAIStrategyCSV
 
                 decimal adjustedReturn = tradeReturn * RiskMultiplier;
 
-                // ИСПРАВЛЕНО: Комиссия считается от реального объема позы, а не вычитается из всего баланса
                 decimal positionVolume = Balance * RiskMultiplier;
                 decimal commission = positionVolume * CommissionRate;
 
@@ -316,6 +325,7 @@ namespace TestAIStrategyCSV
 
             UpdateDrawdown();
         }
+
 
         private void UpdateDrawdown()
         {
