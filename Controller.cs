@@ -33,19 +33,21 @@ namespace TestAIStrategyCSV
                 try
                 {
                     // ИСПРАВЛЕНО: Гибкий парсинг даты из массива форматов
-                    if (!DateTime.TryParseExact(columns[2].Trim(), DateFormats, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime date))
+                    if (!DateTime.TryParseExact(columns[0].Trim(), DateFormats, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime date))
                     {
                         // Резервный вариант, если формат совсем нестандартный
-                        date = DateTime.Parse(columns[2].Trim(), CultureInfo.InvariantCulture);
+                        date = DateTime.Parse(columns[0].Trim(), CultureInfo.InvariantCulture);
                     }
-                    
-                    decimal close = decimal.Parse(columns[4].Trim(), CultureInfo.InvariantCulture);
+                    decimal close = decimal.Parse(columns[5].Trim(), CultureInfo.InvariantCulture);
+
                     //if (int.Parse(columns[5].Trim(), CultureInfo.InvariantCulture) > 2)
-                    //    history.Add(new Candle { Date = date, Close = close });
-                    if (history.Count == 0) history.Add(new Candle { Date = date, Close = close });
-                    else
-                    if (history[history.Count - 1].Close != close )
                         history.Add(new Candle { Date = date, Close = close });
+
+
+                    //if (history.Count == 0) history.Add(new Candle { Date = date, Close = close });
+                    //else
+                    //if (history[history.Count - 1].Close != close )
+                    //    history.Add(new Candle { Date = date, Close = close });
                 }
                 catch (Exception ex)
                 {

@@ -11,7 +11,7 @@ namespace TestAIStrategyCSV
         {
             // ============================ ТУМБЛЕРЫ НАСТРОЕК ============================
             // Выбор инструмента: true = Gold, false = Brent
-            bool useGold = true;   // <-- Меняй здесь для переключения между графиками
+            bool useGold = false;   // <-- Меняй здесь для переключения между графиками
 
             // Флаги для разрешения направлений (можно подстроить под стратегии)
             bool allowLongGlobal = true;
@@ -20,7 +20,7 @@ namespace TestAIStrategyCSV
             // Настройки плеча и комиссии
             decimal initialCapital = 10000m;
             decimal commissionRate = 0.0003m;
-            decimal leverage = 1.5m;
+            decimal leverage = 5m;
 
             // Параметры перебора стратегий (можно менять прямо здесь)
             int[] breakoutOptions = { 10, 15, 20, 25, 30 };
@@ -33,8 +33,8 @@ namespace TestAIStrategyCSV
             if (useGold)
             {
                 string[] goldFiles = {
-                    @"Gold_1day_01012016_25052026.csv"
-                    //@"H:\SSD\GOLD_050101_091231.csv",
+                    //@"Gold_1day_01012016_25052026.csv"
+                    //@"gold_daily.csv"
                     //@"H:\SSD\GOLD_100101_141231.csv",
                     //@"H:\SSD\GOLD_150101_191231.csv",
                     //@"H:\SSD\GOLD_200101_241231.csv",
@@ -47,8 +47,8 @@ namespace TestAIStrategyCSV
             else
             {
                 string[] brentFiles = {
-                    @"_Brent_Crude_Oil_1day_11052001_25052026.csv"
-                    //@"H:\SSD\BZ_050101_091231.csv",
+                    //@"_Brent_Crude_Oil_1day_11052001_25052026.csv"
+                    @"BRENT_DAY.csv"
                     //@"H:\SSD\BZ_100101_141231.csv",
                     //@"H:\SSD\BZ_150101_191231.csv",
                     //@"H:\SSD\BZ_200101_241231.csv",
@@ -66,14 +66,12 @@ namespace TestAIStrategyCSV
             }
 
             history = history.OrderBy(c => c.Date).ToList();
-            Console.WriteLine($"Загружено {history.Count} свечей. Запуск анализа...");
-
             decimal testShare = 10000m;
 
             // =====================================================================
             // 1. ПРОБОЙ КАНАЛА
             // =====================================================================
-            Console.WriteLine("\n📈 РЕЗУЛЬТАТЫ СТРАТЕГИИ [ПРОБОЙ КАНАЛА] (Плечо 1.5х):");
+            Console.WriteLine($"\n📈 РЕЗУЛЬТАТЫ СТРАТЕГИИ [ПРОБОЙ КАНАЛА] (Плечо {leverage}x):");
             int bestBrkOpt = 15;
             decimal bestBrkBalance = 0m;
 
@@ -96,7 +94,7 @@ namespace TestAIStrategyCSV
             // =====================================================================
             // 2. ИМПУЛЬС MA + ATR
             // =====================================================================
-            Console.WriteLine("\n⚡ РЕЗУЛЬТАТЫ СТРАТЕГИИ [ИМПУЛЬС MA + ATR] (Плечо 1.5х):");
+            Console.WriteLine($"\n⚡ РЕЗУЛЬТАТЫ СТРАТЕГИИ [ИМПУЛЬС MA + ATR] (Плечо {leverage}x):");
             decimal bestAtrOpt = 3.5m;
             decimal bestAtrBalance = 0m;
 
@@ -119,7 +117,7 @@ namespace TestAIStrategyCSV
             // =====================================================================
             // 3. КОНТР-ТРЕНД / ИМПУЛЬС RSI
             // =====================================================================
-            Console.WriteLine("\n🔄 РЕЗУЛЬТАТЫ СТРАТЕГИИ [КОНТР-ТРЕНД RSI] (Плечо 1.5х):");
+            Console.WriteLine($"\n🔄 РЕЗУЛЬТАТЫ СТРАТЕГИИ [КОНТР-ТРЕНД RSI] (Плечо {leverage}x):");
             int bestRsiOpt = 14;
             decimal bestRsiBalance = 0m;
 
