@@ -47,7 +47,7 @@ namespace TestAIStrategyCSV
             else
             {
                 string[] brentFiles = {
-                    @"D:\_Brent_Crude_Oil_1day_11052001_25052026.csv"
+                    @"_Brent_Crude_Oil_1day_11052001_25052026.csv"
                     //@"H:\SSD\BZ_050101_091231.csv",
                     //@"H:\SSD\BZ_100101_141231.csv",
                     //@"H:\SSD\BZ_150101_191231.csv",
@@ -89,7 +89,7 @@ namespace TestAIStrategyCSV
                 engine.ForceClose(history.Last().Close, history.Last().Date);
 
                 decimal profitPercent = ((engine.Balance - testShare) / testShare) * 100m;
-                Console.WriteLine($"  Период {brkPeriod,2} дней -> Прибыль: {profitPercent.ToString("+0.0;-0.0;0.0"),7}% | Баланс: ${engine.Balance:F2} (Просадка: {engine.MaxDrawdown:F1}%)");
+                Console.WriteLine($"  Период {brkPeriod,2} дней -> Прибыль: {profitPercent.ToString("+0.0;-0.0;0.0"),7}% | Баланс: ${engine.Balance:F2} (Просадка: {engine.MaxDrawdown:F1}%) Сделок: {engine.TotalTrades}");
                 if (engine.Balance > bestBrkBalance) { bestBrkBalance = engine.Balance; bestBrkOpt = brkPeriod; }
             }
 
@@ -112,7 +112,7 @@ namespace TestAIStrategyCSV
                 engine.ForceClose(history.Last().Close, history.Last().Date);
 
                 decimal profitPercent = ((engine.Balance - testShare) / testShare) * 100m;
-                Console.WriteLine($"  Множитель ATR {atrMult:F1}x -> Прибыль: {profitPercent.ToString("+0.0;-0.0;0.0"),7}% | Баланс: ${engine.Balance:F2} (Просадка: {engine.MaxDrawdown:F1}%)");
+                Console.WriteLine($"  Множитель ATR {atrMult:F1}x -> Прибыль: {profitPercent.ToString("+0.0;-0.0;0.0"),7}% | Баланс: ${engine.Balance:F2} (Просадка: {engine.MaxDrawdown:F1}%) Сделок: {engine.TotalTrades}");
                 if (engine.Balance > bestAtrBalance) { bestAtrBalance = engine.Balance; bestAtrOpt = atrMult; }
             }
 
@@ -125,7 +125,6 @@ namespace TestAIStrategyCSV
 
             foreach (int rsiPeriod in rsiOptions)
             {
-                // isInverted = true → следует тренду (сигнал при RSI>70 на лонг, RSI<30 на шорт)
                 var engine = new CounterTrendStrategy(testShare, commissionRate, rsiPeriod, isInverted: true);
                 engine.SetLeverage(leverage);
                 engine.AllowLong = allowLongGlobal;
@@ -136,7 +135,7 @@ namespace TestAIStrategyCSV
                 engine.ForceClose(history.Last().Close, history.Last().Date);
 
                 decimal profitPercent = ((engine.Balance - testShare) / testShare) * 100m;
-                Console.WriteLine($"  Период RSI {rsiPeriod,2} дней -> Прибыль: {profitPercent.ToString("+0.0;-0.0;0.0"),7}% | Баланс: ${engine.Balance:F2} (Просадка: {engine.MaxDrawdown:F1}%)");
+                Console.WriteLine($"  Период RSI {rsiPeriod,2} дней -> Прибыль: {profitPercent.ToString("+0.0;-0.0;0.0"),7}% | Баланс: ${engine.Balance:F2} (Просадка: {engine.MaxDrawdown:F1}%) Сделок: {engine.TotalTrades}");
                 if (engine.Balance > bestRsiBalance) { bestRsiBalance = engine.Balance; bestRsiOpt = rsiPeriod; }
             }
 
@@ -179,9 +178,11 @@ namespace TestAIStrategyCSV
             decimal finalTotalBalance = bestBreakout.Balance + bestMomentum.Balance + bestCounter.Balance;
             decimal finalProfitPercent = ((finalTotalBalance - initialCapital) / initialCapital) * 100m;
             decimal portfolioMaxDrawdown = (bestBreakout.MaxDrawdown + bestMomentum.MaxDrawdown + bestCounter.MaxDrawdown) / 3m;
+            int totalTradesPortfolio = bestBreakout.TotalTrades + bestMomentum.TotalTrades + bestCounter.TotalTrades;
 
             Console.WriteLine($"Итоговый баланс портфеля: ${finalTotalBalance:F2} ({finalProfitPercent:+0.0;-0.0;0.0}%)");
             Console.WriteLine($"МАКСИМАЛЬНАЯ ПРОСАДКА ПОРТФЕЛЯ: {portfolioMaxDrawdown:F1}%");
+            Console.WriteLine($"ОБЩЕЕ КОЛИЧЕСТВО СДЕЛОК ПОРТФЕЛЯ: {totalTradesPortfolio}");
             Console.WriteLine("===============================================================================================");
 
             // ==================== СИГНАЛЫ НА ПОСЛЕДНИЙ ДЕНЬ ====================
