@@ -11,11 +11,11 @@ namespace TestAIStrategyCSV
         {
             // ============================ ТУМБЛЕРЫ НАСТРОЕК ============================
             // Выбор инструмента: true = Gold, false = Brent
-            bool useGold = false;   // <-- Меняй здесь для переключения между графиками
+            bool useGold = true;   // <-- Меняй здесь для переключения между графиками
 
             // Флаги для разрешения направлений (можно подстроить под стратегии)
             bool allowLongGlobal = true;
-            bool allowShortGlobal = true;
+            bool allowShortGlobal = false;
 
             // Настройки плеча и комиссии
             decimal initialCapital = 10000m;
@@ -33,12 +33,12 @@ namespace TestAIStrategyCSV
             if (useGold)
             {
                 string[] goldFiles = {
-                    @"H:\SSD\GOLD_000101_041231.csv",
-                    @"H:\SSD\GOLD_050101_091231.csv",
-                    @"H:\SSD\GOLD_100101_141231.csv",
-                    @"H:\SSD\GOLD_150101_191231.csv",
-                    @"H:\SSD\GOLD_200101_241231.csv",
-                    @"H:\SSD\GOLD_250101_260522.csv"
+                    @"Gold_1day_01012016_25052026.csv"
+                    //@"H:\SSD\GOLD_050101_091231.csv",
+                    //@"H:\SSD\GOLD_100101_141231.csv",
+                    //@"H:\SSD\GOLD_150101_191231.csv",
+                    //@"H:\SSD\GOLD_200101_241231.csv",
+                    //@"H:\SSD\GOLD_250101_260522.csv"
                 };
                 foreach (var f in goldFiles)
                     if (File.Exists(f)) history.AddRange(Controller.ParserDay(f));

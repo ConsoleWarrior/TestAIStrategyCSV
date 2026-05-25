@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -37,10 +38,14 @@ namespace TestAIStrategyCSV
                         // Резервный вариант, если формат совсем нестандартный
                         date = DateTime.Parse(columns[2].Trim(), CultureInfo.InvariantCulture);
                     }
-
+                    
                     decimal close = decimal.Parse(columns[4].Trim(), CultureInfo.InvariantCulture);
-
-                    history.Add(new Candle { Date = date, Close = close });
+                    //if (int.Parse(columns[5].Trim(), CultureInfo.InvariantCulture) > 2)
+                    //    history.Add(new Candle { Date = date, Close = close });
+                    if (history.Count == 0) history.Add(new Candle { Date = date, Close = close });
+                    else
+                    if (history[history.Count - 1].Close != close )
+                        history.Add(new Candle { Date = date, Close = close });
                 }
                 catch (Exception ex)
                 {
