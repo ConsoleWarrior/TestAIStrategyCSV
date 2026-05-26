@@ -20,7 +20,7 @@ namespace TestAIStrategyCSV
             // Настройки плеча и комиссии
             decimal initialCapital = 10000m;
             decimal commissionRate = 0.0003m;
-            decimal leverage = 5m;
+            decimal leverage = 2.5m;
 
             // Параметры перебора стратегий (можно менять прямо здесь)
             int[] breakoutOptions = { 10, 15, 20, 25, 30 };
