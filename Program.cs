@@ -87,7 +87,9 @@ namespace TestAIStrategyCSV
                 engine.ForceClose(history.Last().Close, history.Last().Date);
 
                 decimal profitPercent = ((engine.Balance - testShare) / testShare) * 100m;
-                Console.WriteLine($"  Период {brkPeriod,2} дней -> Прибыль: {profitPercent.ToString("+0.0;-0.0;0.0"),7}% | Баланс: ${engine.Balance:F2} (Просадка: {engine.MaxDrawdown:F1}%) Сделок: {engine.TotalTrades}");
+                //Console.WriteLine($"  Период {brkPeriod,2} дней -> Прибыль: {profitPercent.ToString("+0.0;-0.0;0.0"),7}% | Баланс: ${engine.Balance:F2} (Просадка: {engine.MaxDrawdown:F1}%) Сделок: {engine.TotalTrades}");
+                int winPercent = engine.TotalTrades > 0 ? (int)Math.Round((decimal)engine.WinningTrades / engine.TotalTrades * 100m) : 0;
+                Console.WriteLine($"  Период {brkPeriod,2} дней -> Прибыль: {profitPercent.ToString("+0.0;-0.0;0.0"),7}% | Баланс: ${engine.Balance:F2} (Просадка: {engine.MaxDrawdown:F1}%) Сделок: {engine.TotalTrades}({winPercent}% прибыльных)");
                 if (engine.Balance > bestBrkBalance) { bestBrkBalance = engine.Balance; bestBrkOpt = brkPeriod; }
             }
 
@@ -110,7 +112,9 @@ namespace TestAIStrategyCSV
                 engine.ForceClose(history.Last().Close, history.Last().Date);
 
                 decimal profitPercent = ((engine.Balance - testShare) / testShare) * 100m;
-                Console.WriteLine($"  Множитель ATR {atrMult:F1}x -> Прибыль: {profitPercent.ToString("+0.0;-0.0;0.0"),7}% | Баланс: ${engine.Balance:F2} (Просадка: {engine.MaxDrawdown:F1}%) Сделок: {engine.TotalTrades}");
+                //Console.WriteLine($"  Множитель ATR {atrMult:F1}x -> Прибыль: {profitPercent.ToString("+0.0;-0.0;0.0"),7}% | Баланс: ${engine.Balance:F2} (Просадка: {engine.MaxDrawdown:F1}%) Сделок: {engine.TotalTrades}");
+                int winPercent = engine.TotalTrades > 0 ? (int)Math.Round((decimal)engine.WinningTrades / engine.TotalTrades * 100m) : 0;
+                Console.WriteLine($"  Множитель ATR {atrMult:F1}x -> Прибыль: {profitPercent.ToString("+0.0;-0.0;0.0"),7}% | Баланс: ${engine.Balance:F2} (Просадка: {engine.MaxDrawdown:F1}%) Сделок: {engine.TotalTrades}({winPercent}% прибыльных)");
                 if (engine.Balance > bestAtrBalance) { bestAtrBalance = engine.Balance; bestAtrOpt = atrMult; }
             }
 
@@ -133,7 +137,9 @@ namespace TestAIStrategyCSV
                 engine.ForceClose(history.Last().Close, history.Last().Date);
 
                 decimal profitPercent = ((engine.Balance - testShare) / testShare) * 100m;
-                Console.WriteLine($"  Период RSI {rsiPeriod,2} дней -> Прибыль: {profitPercent.ToString("+0.0;-0.0;0.0"),7}% | Баланс: ${engine.Balance:F2} (Просадка: {engine.MaxDrawdown:F1}%) Сделок: {engine.TotalTrades}");
+                //Console.WriteLine($"  Период RSI {rsiPeriod,2} дней -> Прибыль: {profitPercent.ToString("+0.0;-0.0;0.0"),7}% | Баланс: ${engine.Balance:F2} (Просадка: {engine.MaxDrawdown:F1}%) Сделок: {engine.TotalTrades}");
+                int winPercent = engine.TotalTrades > 0 ? (int)Math.Round((decimal)engine.WinningTrades / engine.TotalTrades * 100m) : 0;
+                Console.WriteLine($"  Период RSI {rsiPeriod,2} дней -> Прибыль: {profitPercent.ToString("+0.0;-0.0;0.0"),7}% | Баланс: ${engine.Balance:F2} (Просадка: {engine.MaxDrawdown:F1}%) Сделок: {engine.TotalTrades}({winPercent}% прибыльных)");
                 if (engine.Balance > bestRsiBalance) { bestRsiBalance = engine.Balance; bestRsiOpt = rsiPeriod; }
             }
 
@@ -180,8 +186,9 @@ namespace TestAIStrategyCSV
 
             Console.WriteLine($"Итоговый баланс портфеля: ${finalTotalBalance:F2} ({finalProfitPercent:+0.0;-0.0;0.0}%)");
             Console.WriteLine($"МАКСИМАЛЬНАЯ ПРОСАДКА ПОРТФЕЛЯ: {portfolioMaxDrawdown:F1}%");
-            Console.WriteLine($"ОБЩЕЕ КОЛИЧЕСТВО СДЕЛОК ПОРТФЕЛЯ: {totalTradesPortfolio}");
-            Console.WriteLine("===============================================================================================");
+            int totalWinning = bestBreakout.WinningTrades + bestMomentum.WinningTrades + bestCounter.WinningTrades;
+            int totalWinPercent = totalTradesPortfolio > 0 ? (int)Math.Round((decimal)totalWinning / totalTradesPortfolio * 100m) : 0;
+            Console.WriteLine($"ОБЩЕЕ КОЛИЧЕСТВО СДЕЛОК ПОРТФЕЛЯ: {totalTradesPortfolio} ({totalWinPercent}% прибыльных)"); Console.WriteLine("===============================================================================================");
 
             // ==================== СИГНАЛЫ НА ПОСЛЕДНИЙ ДЕНЬ ====================
             Console.WriteLine($"\nℹ️  ФОРМИРОВАНИЕ ТОРГОВЫХ СИГНАЛОВ НА {history.Last().Date:yyyy-MM-dd}");

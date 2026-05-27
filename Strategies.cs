@@ -20,15 +20,16 @@ namespace TestAIStrategyCSV
 
         public decimal Balance { get; protected set; }
         public int TotalTrades { get; protected set; }
+        public int WinningTrades { get; protected set; }   // новые поля
+        public int LosingTrades { get; protected set; }    // новые поля
         public decimal MaxDrawdown { get; protected set; }
         private decimal _peakBalance;
 
         protected decimal CommissionRate;
         protected int CurrentPosition = 0;
         protected decimal EntryPrice = 0m;
-        protected DateTime EntryDate;   // дата входа
+        protected DateTime EntryDate;
 
-        // Список всех закрытых сделок (для отчёта)
         public List<TradeRecord> TradesHistory { get; } = new List<TradeRecord>();
 
         public BaseStrategy(decimal startCapital, decimal commission)
@@ -52,23 +53,24 @@ namespace TestAIStrategyCSV
 
             if (targetPosition == CurrentPosition) return;
 
-            // --- Закрытие позиции (если была открыта) ---
             if (CurrentPosition != 0)
             {
-                // Сырая доходность без плеча (просто изменение цены)
                 decimal rawReturn = CurrentPosition == 1
                     ? (currentPrice - EntryPrice) / EntryPrice
                     : (EntryPrice - currentPrice) / EntryPrice;
 
-                // Доходность с плечом
                 decimal leveragedReturn = rawReturn * RiskMultiplier;
 
                 decimal positionVolume = Balance * RiskMultiplier;
                 decimal commission = positionVolume * CommissionRate;
-
                 decimal newBalance = Balance * (1 + leveragedReturn) - commission;
 
-                // Запись сделки в историю
+                // Подсчёт прибыльных/убыточных сделок по результату с плечом
+                if (leveragedReturn > 0)
+                    WinningTrades++;
+                else if (leveragedReturn < 0)
+                    LosingTrades++;
+
                 TradesHistory.Add(new TradeRecord
                 {
                     Type = CurrentPosition == 1 ? "Buy" : "Sell",
@@ -83,11 +85,9 @@ namespace TestAIStrategyCSV
 
                 Balance = newBalance;
                 TotalTrades++;
-
                 UpdateDrawdown();
             }
 
-            // --- Открытие новой позиции ---
             CurrentPosition = targetPosition;
             EntryPrice = currentPrice;
             EntryDate = date;
