@@ -15,7 +15,6 @@ namespace TestAIStrategyCSV
         protected decimal RiskMultiplier = 1.0m;
         private decimal _baseLeverage = 1.0m;
 
-        // Флаги управления направлениями (тумблеры)
         public bool AllowLong { get; set; } = true;
         public bool AllowShort { get; set; } = true;
 
@@ -27,6 +26,10 @@ namespace TestAIStrategyCSV
         protected decimal CommissionRate;
         protected int CurrentPosition = 0;
         protected decimal EntryPrice = 0m;
+        protected DateTime EntryDate;   // дата входа
+
+        // Список всех закрытых сделок (для отчёта)
+        public List<TradeRecord> TradesHistory { get; } = new List<TradeRecord>();
 
         public BaseStrategy(decimal startCapital, decimal commission)
         {
@@ -44,31 +47,50 @@ namespace TestAIStrategyCSV
 
         protected void Trade(int targetPosition, decimal currentPrice, DateTime date)
         {
-            // Блокируем вход, если направление запрещено флагами
             if (targetPosition == 1 && !AllowLong) targetPosition = 0;
             if (targetPosition == -1 && !AllowShort) targetPosition = 0;
 
             if (targetPosition == CurrentPosition) return;
 
+            // --- Закрытие позиции (если была открыта) ---
             if (CurrentPosition != 0)
             {
-                decimal tradeReturn = CurrentPosition == 1
+                // Сырая доходность без плеча (просто изменение цены)
+                decimal rawReturn = CurrentPosition == 1
                     ? (currentPrice - EntryPrice) / EntryPrice
                     : (EntryPrice - currentPrice) / EntryPrice;
 
-                decimal adjustedReturn = tradeReturn * RiskMultiplier;
+                // Доходность с плечом
+                decimal leveragedReturn = rawReturn * RiskMultiplier;
 
                 decimal positionVolume = Balance * RiskMultiplier;
                 decimal commission = positionVolume * CommissionRate;
 
-                Balance = Balance * (1 + adjustedReturn) - commission;
+                decimal newBalance = Balance * (1 + leveragedReturn) - commission;
+
+                // Запись сделки в историю
+                TradesHistory.Add(new TradeRecord
+                {
+                    Type = CurrentPosition == 1 ? "Buy" : "Sell",
+                    EntryDate = EntryDate,
+                    ExitDate = date,
+                    EntryPrice = EntryPrice,
+                    ExitPrice = currentPrice,
+                    RawProfitPercent = rawReturn * 100m,
+                    LeveragedProfitPercent = leveragedReturn * 100m,
+                    BalanceAfter = newBalance
+                });
+
+                Balance = newBalance;
                 TotalTrades++;
 
                 UpdateDrawdown();
             }
 
+            // --- Открытие новой позиции ---
             CurrentPosition = targetPosition;
             EntryPrice = currentPrice;
+            EntryDate = date;
 
             if (CurrentPosition != 0)
             {
@@ -90,16 +112,10 @@ namespace TestAIStrategyCSV
             else if (_peakBalance > 0)
             {
                 decimal currentDrawdown = (_peakBalance - Balance) / _peakBalance * 100m;
-
                 if (currentDrawdown > MaxDrawdown)
-                {
                     MaxDrawdown = currentDrawdown;
-                }
 
-                if (currentDrawdown > 35.0m)
-                    RiskMultiplier = _baseLeverage * 0.33m;
-                else
-                    RiskMultiplier = _baseLeverage;
+                RiskMultiplier = currentDrawdown > 35.0m ? _baseLeverage * 0.33m : _baseLeverage;
             }
         }
 
@@ -107,6 +123,19 @@ namespace TestAIStrategyCSV
         {
             if (CurrentPosition != 0) Trade(0, finalPrice, date);
         }
+    }
+
+    // Новая структура для записи сделки
+    public class TradeRecord
+    {
+        public string Type { get; set; }          // "Buy" или "Sell"
+        public DateTime EntryDate { get; set; }
+        public DateTime ExitDate { get; set; }
+        public decimal EntryPrice { get; set; }
+        public decimal ExitPrice { get; set; }
+        public decimal RawProfitPercent { get; set; }     // без плеча
+        public decimal LeveragedProfitPercent { get; set; } // с плечом
+        public decimal BalanceAfter { get; set; }
     }
 
     public class BreakoutStrategy : BaseStrategy

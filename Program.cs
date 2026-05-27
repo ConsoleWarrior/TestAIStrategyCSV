@@ -34,7 +34,7 @@ namespace TestAIStrategyCSV
             {
                 string[] goldFiles = {
                     //@"Gold_1day_01012016_25052026.csv"
-                    //@"gold_daily.csv"
+                    @"gold_daily.csv"
                     //@"H:\SSD\GOLD_100101_141231.csv",
                     //@"H:\SSD\GOLD_150101_191231.csv",
                     //@"H:\SSD\GOLD_200101_241231.csv",
@@ -235,6 +235,38 @@ namespace TestAIStrategyCSV
             else { Console.ForegroundColor = ConsoleColor.Gray; Console.WriteLine($"ВНЕ РЫНКА (RSI: {rsiNow:F1})"); }
             Console.ResetColor();
 
+            Console.WriteLine("======================================================================");
+            // ========== ПОЛНЫЙ СПИСОК СДЕЛОК ДЛЯ ЛУЧШЕГО ВАРИАНТА ПРОБОЙНОЙ СТРАТЕГИИ ==========
+            Console.WriteLine($"\n📋 ПОЛНЫЙ СПИСОК СДЕЛОК для лучшего пробоя (период {bestBrkOpt}):");
+            var bestBreakoutForReport = new BreakoutStrategy(testShare, commissionRate, bestBrkOpt);
+            bestBreakoutForReport.SetLeverage(leverage);
+            bestBreakoutForReport.AllowLong = allowLongGlobal;
+            bestBreakoutForReport.AllowShort = allowShortGlobal;
+
+            // Прогоняем всю историю, записывая сделки
+            for (int i = bestBrkOpt + 1; i < history.Count; i++)
+            {
+                bestBreakoutForReport.Update(history.Take(i + 1).ToList());
+            }
+            bestBreakoutForReport.ForceClose(history.Last().Close, history.Last().Date);
+
+            // Выводим каждую сделку
+            if (bestBreakoutForReport.TradesHistory.Count == 0)
+            {
+                Console.WriteLine("  Сделок не было.");
+            }
+            else
+            {
+                foreach (var trade in bestBreakoutForReport.TradesHistory)
+                {
+                    // Форматирование: направление, дата входа/выхода, цены, проценты, баланс
+                    string direction = trade.Type; // "Buy" или "Sell"
+                    string sign = trade.RawProfitPercent >= 0 ? "+" : "";
+                    string signLev = trade.LeveragedProfitPercent >= 0 ? "+" : "";
+                    Console.WriteLine($"{direction} {trade.EntryDate:dd.MM.yyyy} по {trade.EntryPrice:F2} / {trade.ExitDate:dd.MM.yyyy} по {trade.ExitPrice:F2} = {sign}{trade.RawProfitPercent:F1}% ({signLev}{trade.LeveragedProfitPercent:F1}% с плечом) На счете {trade.BalanceAfter:F0}");
+                }
+            }
+            Console.WriteLine($"\nВсего сделок: {bestBreakoutForReport.TotalTrades}");
             Console.WriteLine("======================================================================");
             Console.ReadLine();
         }
